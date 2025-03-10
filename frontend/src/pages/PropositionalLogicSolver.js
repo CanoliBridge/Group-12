@@ -4,6 +4,7 @@ import { Page, PageContent, Box, Text, Card, CardBody, TextInput, CardFooter, Bu
 import { solvePropositionalLogic } from '../api';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 
 /*
@@ -18,6 +19,8 @@ const PropositionalLogicSolver = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("PROPOSITIONAL_LOGIC");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -36,15 +39,32 @@ const PropositionalLogicSolver = () => {
     }
 
     setError('');
-    try {
-      const result = await solvePropositionalLogic({ hypotheses, conclusion });
-      setOutput(result);
-    } catch (err) {
-      setError('An error occurred while solving the propositional logic.');
-    } finally {
-      setLoading(false);
-    }
-  }
+    const startTime = performance.now();
+        
+        try {
+          const result = await solvePropositionalLogic({hypotheses, conclusion});
+          
+          // Track successful execution with timing
+          trackResults(
+            { hypotheses: hypotheses, conclusion: conclusion }, // Input data
+            result,       // Result data
+            performance.now() - startTime      // Execution time in ms
+          );
+          
+          setOutput(result);
+        } catch (err) {
+          // Track failed execution with timing
+          trackResults(
+            { hypotheses: hypotheses, conclusion: conclusion },
+            { error: err.message || 'Unknown error' },
+            performance.now() - startTime
+          );
+          
+          setError('An error occurred while solving the WFF.');
+        } finally {
+          setLoading(false);
+        }
+      }
 
   const validateInput = (input) => {
     // Regular expression to validate WFF general form, including operators, NOT, parentheses, and brackets.

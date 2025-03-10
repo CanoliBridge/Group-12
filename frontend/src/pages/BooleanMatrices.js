@@ -7,6 +7,7 @@ import Background from '../components/Background';
 import MatrixTable from '../components/MatrixTable';
 import MatrixToolbar from '../components/MatrixToolbar';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: BooleanMatrices.js
@@ -23,6 +24,8 @@ const BooleanMatrices = () => {
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
+  const { trackResults } = useDiagnostics("BOOLEAN_MATRICES");
+
   const handleSolve = async () => {
     // Empty output and error messages
     setLoading(true);
@@ -37,10 +40,29 @@ const BooleanMatrices = () => {
     }
 
     setError('');
+    
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try {
       const result = await solveBooleanMatrices(matrix1, matrix2, operation);
+
+      // Tracking results for diagnostics
+      trackResults(
+        { matrix1: matrix1, matrix2: matrix2, operation: operation },
+        result, 
+        performance.now() - startTime
+      )
+
       setOutput(result);
     } catch (err) {
+
+      trackResults(
+        { matrix1: matrix1, matrix2: matrix2, operation: operation },
+        { error: err.message || "Error solving Boolean Matrices" },
+        performance.now() - startTime
+      );
+
       setError('An error occurred while generating the matrix.');
     } finally {
       setLoading(false);

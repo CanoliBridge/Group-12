@@ -4,6 +4,7 @@ import { solvePowerSet } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: PowerSets.js
@@ -16,6 +17,8 @@ const PowerSets = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("POWER_SET");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -31,12 +34,31 @@ const PowerSets = () => {
       return;
     }
 
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     setError('');
     try {
       const result = await solvePowerSet(input);
       setOutput(result);
+
+      // Track successful execution with timing
+      trackResults(
+        { set: input}, // Input data
+        result,       // Result data
+        performance.now() - startTime      // Execution time in ms
+      );
+
     } catch (err) {
       setError('An error occurred while finding the power set.');
+
+      // Track failed execution with timing
+      trackResults(
+        { set: input },
+        { error: err.message || 'Unknown error' },
+        performance.now() - startTime
+      );
+
     } finally {
       setLoading(false);
     }

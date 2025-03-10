@@ -5,6 +5,7 @@ import { solvePropertiesOfRelations } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: RelationProperties.js
@@ -20,12 +21,14 @@ const RelationProperties = () => {
   const [loading, setLoading] = React.useState(false);
   const [showHelp, setShowHelp] = React.useState(false);
 
+  const { trackResults } = useDiagnostics("RELATION_PROPERTIES");
+
   const handleSolve = async () => {
     // Empty output and error messages
     setLoading(true);
     setOutput('');
     setError('');
-
+  
     // Validate input
     const isValidSet = validateSet(set);
     const isValidRelation = validateRelation(relation, set);
@@ -37,29 +40,51 @@ const RelationProperties = () => {
     } 
     
     setError('');
+    
+    // Start timing for performance tracking
+    const startTime = performance.now();
+    
     try {
-          let result = await solvePropertiesOfRelations(set, relation);
-    
-          // Parse result if it is a string
-          if (typeof result === 'string') {
-            result = JSON.parse(result);
-          }
-    
-          // Check if there is an error key in the result
-          const errorKey = Object.keys(result).find(key => key.toLowerCase().includes('error'));
-          console.log(errorKey);
-          if (errorKey) {
-            setError(result[errorKey]);
-          } else {
-            setOutput(result);
-          }
-        } catch (err) {
-          console.log(err);
-          setError('An error occurred while analyzing the relations.');
-        } finally {
-          setLoading(false);
-        }
+      let result = await solvePropertiesOfRelations(set, relation);
+  
+      // Parse result if it is a string
+      if (typeof result === 'string') {
+        result = JSON.parse(result);
       }
+  
+      // Check if there is an error key in the result
+      const errorKey = Object.keys(result).find(key => key.toLowerCase().includes('error'));
+      
+      if (errorKey) {
+        // Track result with error
+        trackResults(
+          { set, relation }, // Input data
+          { error: result[errorKey] }, // Error result
+          performance.now() - startTime // Execution time
+        );
+        setError(result[errorKey]);
+      } else {
+        // Track successful result
+        trackResults(
+          { set, relation }, // Input data
+          result, // Success result
+          performance.now() - startTime // Execution time
+        );
+        setOutput(result);
+      }
+    } catch (err) {
+      // Track exception
+      trackResults(
+        { set, relation }, // Input data
+        { error: err.message || 'Unknown error' }, // Error result
+        performance.now() - startTime // Execution time
+      );
+      console.log(err);
+      setError('An error occurred while analyzing the relations.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Validate that set conforms to format
   const validateSet = (input) => {

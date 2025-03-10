@@ -3,8 +3,12 @@
 # Solves: 5.2.5 and 5.2.6
 
 import json
+import os
+import sys
 
-import topological_solver
+# Append the parent directory to the path so we can import in utility
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from solvers import topological_solver
 
 '''
 ==========

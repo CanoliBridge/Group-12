@@ -4,6 +4,7 @@ import { solveArrayToTree } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: ArrayToTree.js
@@ -16,6 +17,8 @@ const ArrayToTree = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("ARRAY_TO_TREE");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -32,10 +35,28 @@ const ArrayToTree = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try {
       const result = await solveArrayToTree(input);
+
+      trackResults(
+        { input: input },
+        result,
+        performance.now() - startTime
+      );
+
       setOutput(result);
     } catch (err) {
+
+      trackResults(
+        { input: input },
+        {error: err.message || "Error solving Array to Tree"},
+        performance.now() - startTime
+      );
+      
       setError('An error occurred while generating the graph.');
     } finally {
       setLoading(false);

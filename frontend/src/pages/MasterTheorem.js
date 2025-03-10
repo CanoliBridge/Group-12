@@ -1,9 +1,10 @@
 import React from 'react';
 import { Page, PageContent, Box, Text, Card, CardBody, TextInput, CardFooter, Button, Spinner } from 'grommet';
-import { solveOrderOfMagnitude } from '../api';
+import { solveMasterTheorem } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: MasterTheorem.js
@@ -17,6 +18,9 @@ const MasterTheorem = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  // Diagnostics tracking
+  const { trackResults } = useDiagnostics("MASTER_THEOREM");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -33,10 +37,30 @@ const MasterTheorem = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try {
-      const result = await solveOrderOfMagnitude(input);
+      const result = await solveMasterTheorem(input);
+
+      // Track successful execution
+      trackResults(
+        { input: input },
+        result,
+        performance.now() - startTime
+      );
+
       setOutput(result);
     } catch (err) {
+
+      // Track failed execution
+      trackResults(
+        { input: input }, // Input data
+        { error: err.message || 'Unknown error' }, // Error result
+        performance.now() - startTime // Execution time
+      );
+
       setError('An error occurred while generating the Big-O Notation.');
     } finally {
       setLoading(false);

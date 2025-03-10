@@ -23,6 +23,9 @@ from backend.solvers import adjacency_solver
 from backend.solvers import weighted_graph_solver
 from backend.solvers import matrix_solver
 from backend.solvers import matrix_multiply_solver
+from backend.solvers import table_solver
+from backend.solvers import topological_solver
+from backend.solvers import critical_solver
 from solvers.util import exceptions
 
 #---Imports for the reporter---#
@@ -108,14 +111,11 @@ def solve_algorithim(solver_type, data):
     elif solver_type == 'hasse-diagrams':
         return hasse_solver.solve(data["set"], data["relation"])
     elif solver_type == 'critical-paths':
-        # Call the appropriate function for Critical Paths
-        pass
+        return critical_solver.solve(data)
     elif solver_type == 'pert-diagrams':
-        # Call the appropriate function for PERT Diagrams
-        pass
+        return table_solver.solve(data)
     elif solver_type == 'topological-sorting':
-        # Call the appropriate function for Topological Sorting
-        pass
+        return topological_solver.solve(data)
     elif solver_type == 'permutations-cycle':
         # Call the appropriate function for Permutations of a Cycle
         pass

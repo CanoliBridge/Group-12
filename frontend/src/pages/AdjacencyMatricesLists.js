@@ -7,6 +7,7 @@ import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
 import AdjacencyMatrix from '../components/AdjacencyMatrix';
 import AdjacencyList from '../components/AdjacencyList';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: AdjacencyMatricesLists.js
@@ -21,6 +22,8 @@ const AdjacencyMatricesLists = () => {
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [showHelp, setShowHelp] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("ADJACENCY_MATRICES_LISTS");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -37,6 +40,10 @@ const AdjacencyMatricesLists = () => {
       }
   
       setError('');
+
+      // Start timing for performance tracking
+      const startTime = performance.now();
+
       try { 
         // Do some conversion to display any backend errors
         let result = await solveAdjacencyMatricesLists(input, type);
@@ -50,12 +57,33 @@ const AdjacencyMatricesLists = () => {
         const errorKey = Object.keys(result).find(key => key.toLowerCase().includes('error'));
         console.log(errorKey);
         if (errorKey) {
+
+          trackResults(
+            { input, type }, // Input data
+            { error: result[errorKey] }, // Error result
+            performance.now() - startTime // Execution time
+          );
+
           setError(result[errorKey]);
         } else {
+
+          trackResults(
+            { input, type }, // Input data
+            result, // Success result
+            performance.now() - startTime // Execution time
+          );
+
           setOutput(result);
         }
       } catch (err) {
         console.log(err);
+
+        trackResults(
+          { input, type }, // Input data
+          { error: err.message || 'Unknown error' }, // Error result
+          performance.now() - startTime // Execution time
+        );
+
         setError('An error occurred while generating the Graph.');
       } finally {
         setLoading(false);

@@ -1,11 +1,13 @@
 import React from 'react';
-import { Page, PageContent, Box, Text, Card, CardBody, TextInput, CardFooter, Button, Spinner} from 'grommet';
+import { Page, PageContent, Box, Text, Card, CardBody, TextInput, CardFooter, Button, Spinner, Collapsible} from 'grommet';
+import { CircleInformation } from 'grommet-icons';
 import { solveWFF } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import TruthTable from '../components/TruthTable';
 import Background from '../components/Background';
 import WFFOperationsTable from '../components/WFFOperationExample';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: WFFSolverPage.js
@@ -18,6 +20,16 @@ const WFFSolverPage = () => {
   const [output, setOutput] = React.useState(null);
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [showHelp, setShowHelp] = React.useState(false);
+
+  // Initialize diagnostic hook
+  const { trackResults } = useDiagnostics("WFF_SOLVER");
+
+  // Wrap input to enable diagnostic tracking
+  const handleInput = (event) => {
+    const newInput = event.target.value;
+    setInput(newInput);
+  }
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -34,13 +46,30 @@ const WFFSolverPage = () => {
     }
 
     setError('');
+
+    const startTime = performance.now();
     
     try {
       const result = await solveWFF(input);
       const parsedResult = JSON.parse(result);
       console.log(parsedResult);
+      
+      // Track successful execution with timing
+      trackResults(
+        { formula: input }, // Input data
+        parsedResult,       // Result data
+        performance.now() - startTime      // Execution time in ms
+      );
+      
       setOutput(parsedResult);
     } catch (err) {
+      // Track failed execution with timing
+      trackResults(
+        { formula: input },
+        { error: err.message || 'Unknown error' },
+        performance.now() - startTime
+      );
+      
       setError('An error occurred while solving the WFF.');
     } finally {
       setLoading(false);
@@ -103,22 +132,31 @@ const WFFSolverPage = () => {
           <Text margin={{"bottom":"small"}} textAlign="start" weight="normal">
             A truth table is a systematic way to list all possible truth values for a given logical expression. It shows how the truth value of the entire formula depends on the truth values of its components. Truth tables are especially useful for verifying tautologies (statements that are always true) or contradictions (statements that are always false).
           </Text>
-          <Text color="#17A2B8" margin={{"bottom":"small"}} textAlign="center" weight="normal">
-            Use the symbols from the table below to create your wff. In the symbol column, from left to right, the solver supports keyboard, unicode, and book syntax.
-          </Text>
-          <WFFOperationsTable />
           <Text textAlign="center" weight="normal" margin={{"bottom":"medium"}}>
             Enter your logical statement below, by using the list of symbols to generate its truth table and analyze its properties!
           </Text>
         </Box>
         <Card width="large" pad="medium" background={{"color":"light-1"}}>
           <CardBody pad="small">
+          <Box margin={{bottom : "small" }}><Box direction="row" align="start" justify="start" margin={{ bottom: 'small' }} style={{ marginLeft: '-8px', marginTop: '-8px' }}>
+            <Button icon={<CircleInformation />} onClick={() => setShowHelp(!showHelp)} plain />
+          </Box>
+          <Collapsible open={showHelp}>
+              <Box pad="small" background="light-2" round="small" margin={{ bottom: "medium" }} width="large">
+                <Text>
+                 Use the symbols from the table below to create your wff. In the symbol column, from left to right, the solver supports keyboard, unicode, and book syntax.
+                </Text>
+                <WFFOperationsTable />
+              </Box>
+            </Collapsible>
+
             <TextInput 
               placeholder="Example: Enter your formula here (e.g., A V B)"
               value={input}
-              onChange={(event) => setInput(event.target.value)}
+              onChange={handleInput}
             />
             {error && <Text color="status-critical">{error}</Text>}
+          </Box>
           </CardBody>
           <CardFooter align="center" direction="row" flex={false} justify="center" gap="medium" pad={{"top":"small"}}>
             <Button label={loading ? <Spinner /> : "Solve"} onClick={handleSolve} disabled={loading} />

@@ -4,6 +4,7 @@ import { solveTreeNotation } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: TreeNotation.js
@@ -16,6 +17,8 @@ const TreeNotation = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("TREE_NOTATION");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -32,10 +35,28 @@ const TreeNotation = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try {
       const result = await solveTreeNotation(input);
+
+      trackResults(
+        { input: input },
+        result,
+        performance.now() - startTime
+      );
+
       setOutput(result);
     } catch (err) {
+
+      trackResults(
+        { input: input },
+        {error: err.message || "Error solving Tree to Array"},
+        performance.now() - startTime
+      );
+
       setError('An error occurred while generating the notation.');
     } finally {
       setLoading(false);

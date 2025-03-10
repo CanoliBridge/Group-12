@@ -3,10 +3,14 @@
 # Solves: 5.2.9-5.2.14
 
 import json
+import os
+import sys
 
-import table_solver
+# Append the parent directory to the path so we can import in utility
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from solvers.util import methods
+from solvers import table_solver
 
-from util import methods
 
 '''
 ==========

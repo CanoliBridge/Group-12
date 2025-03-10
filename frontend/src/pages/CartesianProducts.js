@@ -4,6 +4,7 @@ import { solveCartesianProducts } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: CartesianProducts.js
@@ -16,6 +17,8 @@ const CartesianProducts = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("CARTESIAN_PRODUCTS");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -32,10 +35,28 @@ const CartesianProducts = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try {
       const result = await solveCartesianProducts(input);
+
+      trackResults(
+        { input: input },
+        result,
+        performance.now() - startTime
+      )
+
       setOutput(result);
     } catch (err) {
+
+      trackResults(
+        { input: input },
+        {error: err.message || "Error solving Cartesian Products"},
+        performance.now() - startTime
+      )
+
       setError('An error occurred while finding the cartesian product.');
     } finally {
       setLoading(false);

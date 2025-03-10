@@ -4,6 +4,8 @@ import { solveRecursion } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
+import { base } from 'grommet-icons';
 
 /*
 * Name: RecursiveDefinitions.js
@@ -18,6 +20,8 @@ const RecursiveDefinitions = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("RECURSIVE_DEFINITIONS");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -39,20 +43,34 @@ const RecursiveDefinitions = () => {
     }
 
     setError('');
-    try {
-      const response = await solveRecursion({ formula, baseCase, n });
-      if (response.success) {
-        const formattedOutput = formatOutput(response.results);
-        setOutput(formattedOutput);
-      } else {
-        setError(response.error);
-      }
-    } catch (err) {
-      setError('An error occurred while solving the recursive definition.');
-    } finally {
-      setLoading(false);
-    }
-  }
+    const startTime = performance.now();
+        
+        try {
+          const result = await solveRecursion(formula, baseCase, n);
+          const parsedResult = JSON.parse(result);
+          console.log(parsedResult);
+          
+          // Track successful execution with timing
+          trackResults(
+            { formula: formula, baseCase: baseCase, n: n  }, // Input data
+            parsedResult,       // Result data
+            performance.now() - startTime      // Execution time in ms
+          );
+          
+          setOutput(parsedResult);
+        } catch (err) {
+          // Track failed execution with timing
+          trackResults(
+            { formula: formula, baseCase: baseCase, n: n  }, // Input data
+            { error: err.message || 'Unknown error' },
+            performance.now() - startTime
+          );
+          
+          setError('An error occurred while calculating the solution.');
+        } finally {
+          setLoading(false);
+        }
+      };
 
   const validateFormula = (input) => {
     // Regex to validate the recursive formula (e.g., 2 * f(n-1) + 1)

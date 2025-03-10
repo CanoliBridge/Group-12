@@ -5,6 +5,7 @@ import { CircleInformation } from 'grommet-icons';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: GraphsPage.js
@@ -21,6 +22,8 @@ const GraphsPage = () => {
   const [isIsomorphic, setIsIsomorphic] = React.useState(false);
   const [secondInput, setSecondInput] = React.useState('');
   const [showHelp, setShowHelp] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("GRAPHS");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -47,6 +50,10 @@ const GraphsPage = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try { 
       // Do some conversion to display any backend errors
       let result = await solveGraphs(input, type, isIsomorphic, secondInput);
@@ -60,12 +67,36 @@ const GraphsPage = () => {
       const errorKey = Object.keys(result).find(key => key.toLowerCase().includes('error'));
       console.log(errorKey);
       if (errorKey) {
+
+        // Track failed execution
+        trackResults(
+          { input: input, type: type, isIsomorphic: isIsomorphic, secondInput: secondInput },
+          { error: result[errorKey] }, 
+          performance.now() - startTime
+        );
+
         setError(result[errorKey]);
       } else {
+
+        // Track failed execution
+        trackResults(
+          { input: input, type: type, isIsomorphic: isIsomorphic, secondInput: secondInput },
+          result, 
+          performance.now() - startTime
+        );
+
         setOutput(result["Graph"]);
       }
     } catch (err) {
       console.log(err);
+
+      // Track exception
+      trackResults(
+        { input: input, type: type, isIsomorphic: isIsomorphic, secondInput: secondInput }, // Input data
+        { error: err.message || 'Unknown error' }, // Error result
+        performance.now() - startTime // Execution time
+      );
+
       setError('An error occurred while generating the Graph.');
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import { solvePermutationsCycle } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: PermutationsOfACycle.js
@@ -16,6 +17,8 @@ const PermutationsOfACycle = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("PERMUTATIONS_CYCLE");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -32,10 +35,30 @@ const PermutationsOfACycle = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try {
       const result = await solvePermutationsCycle(input);
+
+      // Tracking results for diagnostics
+      trackResults(
+        { input: input },
+        result, 
+        performance.now() - startTime
+      );
+
       setOutput(result);
     } catch (err) {
+
+      // Tracking failures for diagnostics
+      trackResults(
+        { input: input },
+        { error: err.message || "Error solving PERT diagram" },
+        performance.now() - startTime
+      );
+
       setError('An error occurred while generating the Permutations.');
     } finally {
       setLoading(false);

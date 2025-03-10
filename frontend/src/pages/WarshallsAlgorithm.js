@@ -7,6 +7,7 @@ import MatrixTable from '../components/MatrixTable';
 import MatrixToolbar from '../components/MatrixToolbar';
 import HomeButton from '../components/HomeButton';
 import MatrixOutput from '../components/MatrixOutput';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: WarshallsAlgorithm.js
@@ -19,6 +20,9 @@ const WarshallsAlgorithm = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  // Add diagnostics
+  const { trackResults } = useDiagnostics("WARSHALLS_ALGORITHM");
 
   const handleSolve = async () => {
     setLoading(true);
@@ -33,16 +37,34 @@ const WarshallsAlgorithm = () => {
       return;
     }
 
-
+    const startTime = performance.now();
+    
     try {
       const result = await solveWarshallsAlgorithm(matrix);
-      setOutput(result);
+      const parsedResult = JSON.parse(result);
+      console.log(parsedResult);
+      
+      // Track successful execution with timing
+      trackResults(
+        { formula: matrix }, // Input data
+        parsedResult,       // Result data
+        performance.now() - startTime      // Execution time in ms
+      );
+      
+      setOutput(parsedResult);
     } catch (err) {
-      setError('An error occurred while generating the solution.');
+      // Track failed execution with timing
+      trackResults(
+        { formula: matrix },
+        { error: err.message || 'Unknown error' },
+        performance.now() - startTime
+      );
+      
+      setError('An error occurred while generating the weighted graph.');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const validateMatrices = (matrix) => {
 

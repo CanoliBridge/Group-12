@@ -5,6 +5,7 @@ import { CircleInformation } from 'grommet-icons';
 import ReportFooter from '../components/ReportFooter';
 import HomeButton from '../components/HomeButton';
 import Background from '../components/Background';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: EquivalenceRelations.js
@@ -19,6 +20,8 @@ const EquivalenceRelations = () => {
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [showHelp, setShowHelp] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("EQUIVALENCE_RELATIONS");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -37,6 +40,10 @@ const EquivalenceRelations = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try {
       
       // Do some conversion to display any backend errors
@@ -51,11 +58,32 @@ const EquivalenceRelations = () => {
       const errorKey = Object.keys(result).find(key => key.toLowerCase().includes('error'));
       console.log(errorKey);
       if (errorKey) {
+
+        trackResults(
+          { set, relation }, // Input data
+          { error: result[errorKey] }, // Error result
+          performance.now() - startTime // Execution time
+        );
+
         setError(result[errorKey]);
       } else {
+
+        trackResults(
+          { set, relation }, // Input data
+          result, // Success result
+          performance.now() - startTime // Execution time
+        );
+
         setOutput(result);
       }
     } catch (err) {
+
+      trackResults(
+        { set, relation }, // Input data
+        { error: err.message || 'Unknown error' }, // Error result
+        performance.now() - startTime // Execution time
+      );
+
       console.log(err);
       setError('An error occurred while analyzing the closure axioms.');
     } finally {

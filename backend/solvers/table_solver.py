@@ -3,8 +3,12 @@
 # Solves: 5.2.3 and 5.2.4
 
 import json
+import os
+import sys
 
-from util import exceptions
+# Append the parent directory to the path so we can import in utility
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from solvers.util import exceptions
 
 '''
 ==========
@@ -24,6 +28,7 @@ result
 relation_string: a string of the relation representing the table
 '''
 def solve(table):
+    print(f"Table: {table}")
     set_list, relation = not_string(table)
     
     relation_string = "{"

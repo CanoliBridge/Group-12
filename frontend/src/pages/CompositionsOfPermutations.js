@@ -4,6 +4,7 @@ import { solveCompositions } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: CompositionOfPermutations.js
@@ -16,6 +17,8 @@ const CompositionOfPermutations = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("COMPOSITION_PERMUTATIONS");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -32,10 +35,28 @@ const CompositionOfPermutations = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try {
       const result = await solveCompositions(input);
+
+      trackResults(
+        { input: input },
+        result,
+        performance.now() - startTime
+      )
+
       setOutput(result);
     } catch (err) {
+
+      trackResults(
+        { input: input },
+        {error: err.message || "Error solving Composition of Permutations"},
+        performance.now() - startTime
+      )
+
       setError('An error occurred while generating the composition.');
     } finally {
       setLoading(false);

@@ -1,6 +1,9 @@
-#Chapter 6.1
-#Part 3 weighted graphs with adjacency matrix/list
+'''----------------- 
+# Title: weighted_graph_solver.py
 # Author: Michael Lowder
+# Date: 3/5/2025
+# Description: A solver to generate weighted graphs.
+-----------------'''
 
 import networkx as nx
 import matplotlib

@@ -7,6 +7,7 @@ import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
 import AdjacencyMatrix from '../components/AdjacencyMatrix';
 import AdjacencyList from '../components/AdjacencyList';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: WeightedGraphRepresentations.js
@@ -21,6 +22,9 @@ const WeightedGraphRepresentations = () => {
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [showHelp, setShowHelp] = React.useState(false);
+
+  // Initialize diagnostic hook
+  const { trackResults } = useDiagnostics("WEIGHTED_GRAPHS");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -37,30 +41,35 @@ const WeightedGraphRepresentations = () => {
     }
 
     setError('');
-    try { 
-      // Do some conversion to display any backend errors
-      let result = await solveWeightedGraphs(input, type);
 
-      // Parse result if it is a string
-      if (typeof result === 'string') {
-        result = JSON.parse(result);
-      }
+    const startTime = performance.now();
+
+    try {
+      const result = await solveWeightedGraphs(input);
+      const parsedResult = JSON.parse(result);
+      console.log(parsedResult);
       
-      // Check if there is an error key in the result
-      const errorKey = Object.keys(result).find(key => key.toLowerCase().includes('error'));
-      console.log(errorKey);
-      if (errorKey) {
-        setError(result[errorKey]);
-      } else {
-        setOutput(result);
-      }
+      // Track successful execution with timing
+      trackResults(
+        { formula: input }, // Input data
+        parsedResult,       // Result data
+        performance.now() - startTime      // Execution time in ms
+      );
+      
+      setOutput(parsedResult);
     } catch (err) {
-      console.log(err);
+      // Track failed execution with timing
+      trackResults(
+        { formula: input },
+        { error: err.message || 'Unknown error' },
+        performance.now() - startTime
+      );
+      
       setError('An error occurred while generating the weighted graph.');
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const validateInput = (input) => {
     // Regular expression to match 'coordinate' pairs with weights in the form of {(x1, y1; w1), (x2, y2; w2), ...}

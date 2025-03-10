@@ -1,9 +1,11 @@
 import React from 'react';
-import { Page, PageContent, Box, Text, Card, CardBody, TextInput, CardFooter, Button, Spinner } from 'grommet';
+import { Page, PageContent, Box, Text, Card, CardBody, CardFooter, Button, Spinner } from 'grommet';
 import { solveCriticalPaths } from '../api';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import TaskTableInput from '../components/TaskTableInput';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: CriticalPaths.js
@@ -12,41 +14,135 @@ import HomeButton from '../components/HomeButton';
 */
 
 const CriticalPaths = () => {
-  const [input, setInput] = React.useState('');
+  const [tasks, setTasks] = React.useState([{ name: '', prerequisites: new Set(), time: 0 }]);
+  const [isTimed, setIsTimed] = React.useState(true);
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
+  const { trackResults } = useDiagnostics("CRITICAL_PATHS");
+
+  const formatTasksForBackend = () => {
+    // Create an object to hold the formatted data
+    const taskTable = {};
+    
+    // Process each task
+    tasks.forEach(task => {
+      if (task.name) {
+        // Convert the Set to an array before serializing
+        const prerequisitesArray = Array.from(task.prerequisites);
+        
+        // For debugging
+        console.log(`Task ${task.name} depends on:`, prerequisitesArray);
+        
+        // Store the prerequisites as an array and the time as a number
+        taskTable[task.name] = [prerequisitesArray, isTimed ? task.time : 0];
+      }
+    });
+    
+    console.log("Formatted table:", taskTable);
+    return taskTable;
+  };
+
+  const validateInput = () => {
+
+    // Check for empty task names
+    if (tasks.some(task => !task.name.trim())) {
+      setError('All tasks must have names.');
+      return false;
+    }
+    
+    // Check for duplicate task names
+    const taskNames = tasks.map(t => t.name);
+    if (new Set(taskNames).size !== taskNames.length) {
+      setError('Task names must be unique.');
+      return false;
+    }
+    
+    // Check for negative times
+    if (isTimed && tasks.some(task => task.time < 0)) {
+      setError('Task times cannot be negative.');
+      return false;
+    }
+    
+    // Check for circular dependencies
+    const taskGraph = {};
+    tasks.forEach(task => {
+      taskGraph[task.name] = [...task.prerequisites];
+    });
+    
+    // Maintain a set of visited nodes and a temporary set for cycle detection
+    const visited = new Set();
+    const temp = new Set();
+    
+    // Modified DFS to detect cycles on the fly
+    function hasCycle(node) {
+      if (!visited.has(node)) {
+
+        // Mark the current node as visited and add to temporary set
+        temp.add(node);
+        visited.add(node);
+        
+        // Check all neighbors for cycles
+        for (const neighbor of taskGraph[node]) {
+          if (!visited.has(neighbor) && hasCycle(neighbor)) {
+            return true;
+          } else if (temp.has(neighbor)) {
+            return true;
+          }
+        }
+      }
+      temp.delete(node);
+      return false;
+    }
+    
+    // Check for cycles in each task
+    for (const taskName of taskNames) {
+      if (hasCycle(taskName)) {
+        setError('Circular dependencies detected. Tasks cannot depend on each other cyclically.');
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
   const handleSolve = async () => {
-    // Empty output and error messages
     setLoading(true);
     setOutput('');
     setError('');
 
     // Validate input
-    const isValid = validateInput(input);
-    if (!isValid) {
-      setError('Invalid input. Please enter a valid partial ordering.');
+    if (!validateInput()) {
       setLoading(false);
       return;
     }
 
-    setError('');
+    // Format input to backend specification 
+    const tableFormat = formatTasksForBackend();
+    
+    const startTime = performance.now();
     try {
-      const result = await solveCriticalPaths(input);
+      const result = await solveCriticalPaths(tableFormat);
       setOutput(result);
+      
+      // Tracking results for diagnostics
+      trackResults(
+        { tasks: tableFormat, isTimed },
+        result, 
+        performance.now() - startTime
+      );
     } catch (err) {
-      setError('An error occurred while generating the Critical Path.');
+      trackResults(
+        { tasks: tableFormat, isTimed },
+        { error: err.message || "Error solving PERT diagram" },
+        performance.now() - startTime
+      );
+      setError('An error occurred while generating the PERT Diagram.');
     } finally {
       setLoading(false);
     }
-  }
-
-  const validateInput = (input) => {
-    // TODO: Change regex here based on input pattern
-    const wffRegex = /^[A-Z](\s*->\s*[A-Z])?$/;
-    return wffRegex.test(input);
-  }
+  };
 
   return (
     <Page>
@@ -82,10 +178,11 @@ const CriticalPaths = () => {
           </Box>
           <Card width="large" pad="medium" background={{"color":"light-1"}}>
             <CardBody pad="small">
-              <TextInput 
-                placeholder="Example: Enter your critical paths here"
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
+              <TaskTableInput 
+                tasks={tasks} 
+                setTasks={setTasks}
+                isTimed={isTimed}
+                setIsTimed={setIsTimed}
               />
               {error && <Text color="status-critical">{error}</Text>}
             </CardBody>
@@ -100,7 +197,7 @@ const CriticalPaths = () => {
               </Text>
               <Box align="center" justify="center" pad={{"vertical":"small"}} background={{"color":"light-3"}} round="xsmall">
                 <Text>
-                  {output ? JSON.stringify(output) : "Output will be displayed here!"}
+                  {output ? output : "Output will be displayed here!"}
                 </Text>
               </Box>
             </CardBody>

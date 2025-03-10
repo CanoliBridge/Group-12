@@ -1,3 +1,10 @@
+'''----------------- 
+# Title: Warshall_solver.py
+# Author: Mathias Buchanan 
+# Date: 3/5/2025
+# Description: A solver for Warhsall's algorithm.
+-----------------'''
+
 import math
 import json
 

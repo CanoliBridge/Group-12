@@ -5,6 +5,7 @@ import { CircleInformation } from 'grommet-icons';
 import ReportFooter from '../components/ReportFooter';
 import Background from '../components/Background';
 import HomeButton from '../components/HomeButton';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 /*
 * Name: HasseDiagram.js
@@ -19,6 +20,8 @@ const HasseDiagram = () => {
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [showHelp, setShowHelp] = React.useState(false);
+
+  const { trackResults } = useDiagnostics("HASSE_DIAGRAM");
 
   const handleSolve = async () => {
     // Empty output and error messages
@@ -37,6 +40,10 @@ const HasseDiagram = () => {
     }
 
     setError('');
+
+    // Start timing for performance tracking
+    const startTime = performance.now();
+
     try { 
       // Do some conversion to display any backend errors
       let result = await solveHasseDiagram(set, relation);
@@ -50,12 +57,37 @@ const HasseDiagram = () => {
       const errorKey = Object.keys(result).find(key => key.toLowerCase().includes('error'));
       console.log(errorKey);
       if (errorKey) {
+
+        // Track failed execution
+        trackResults(
+          { set, relation }, // Input data
+          { error: result[errorKey] }, // Error result
+          performance.now() - startTime // Execution time
+        );
         setError(result[errorKey]);
+
       } else {
+
+        // Track successful execution
+        trackResults(
+          { set, relation }, // Input data
+          result, // Success result
+          performance.now() - startTime // Execution time
+        );
+        setOutput(result);
+
         setOutput(result["Hasse Diagram"]);
       }
     } catch (err) {
       console.log(err);
+
+      // Track exception
+      trackResults(
+        { set, relation }, // Input data
+        { error: err.message || 'Unknown error' }, // Error result
+        performance.now() - startTime // Execution time
+      );
+
       setError('An error occurred while generating the Hasse Diagram.');
     } finally {
       setLoading(false);
