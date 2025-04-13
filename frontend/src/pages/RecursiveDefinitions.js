@@ -140,8 +140,14 @@ const RecursiveDefinitions = () => {
       if (result.success && result.results) {
         // Extract and format the recursive function results
         const steps = Object.entries(result.results)
+          .sort((a, b) => {
+            const aNum = parseInt(a[0].match(/\d+/)[0], 10);
+            const bNum = parseInt(b[0].match(/\d+/)[0], 10);
+            return aNum - bNum;
+          })
           .map(([key, value]) => `${key} = ${value}`)
           .join('\n');
+
         
         return steps;
       } else if (result.error) {

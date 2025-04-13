@@ -50,18 +50,20 @@ def solve(formula, base_case, n):
         results = [f(i) for i in range(min_base, n + 1)]
 
         # pretty print the results
-        pretty_results = pretty_print_results(results)
+        pretty_results = pretty_print_results(results, start_index=min_base)
 
         return {"success": True, "results": pretty_results}
 
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-def pretty_print_results(results):
+def pretty_print_results(results, start_index=0):
     """
-    Formats the results as a dictionary with keys in the format f(n).
+    Formats the results as a dictionary with keys in the format f(n), starting from start_index.
 
-    :param results: A list of results from f(0) to f(n).
+    :param results: A list of results from f(start_index) to f(n).
+    :param start_index: The starting index of the results list.
     :return: A dictionary with keys in the format f(n) and corresponding values.
     """
-    return {f"f({i})": result for i, result in enumerate(results)}
+    return {f"f({i})": result for i, result in zip(range(start_index, start_index + len(results)), results)}
+
