@@ -55,12 +55,12 @@ def solve(U, A):
 
     complement_A = find_complement(U, A)
 
-    B = Union(Interval(2, 5), Interval(7, S.Infinity))
-    complement_B = Complement(S.Reals, B)
+    # B = Union(Interval(2, 5), Interval(7, S.Infinity))
+    # complement_B = Complement(S.Reals, B)
 
     result = {
         "complement_A": sorted_set(complement_A),
-        "complement_B": interval_to_str(complement_B),
+        #"complement_B": interval_to_str(complement_B),
     }
 
     return json.dumps(result)
