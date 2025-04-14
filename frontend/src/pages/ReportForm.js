@@ -156,7 +156,7 @@ const ReportForm = () => {
             <Background />
             <Box align="center" justify="center" pad="medium" background="white" style={{ position: 'relative', zIndex: 1, width: '55%', margin: 'auto', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
                 <PageContent align="center" skeleton={false} justify="center">
-                <Box align="start" style={{ position: 'absolute', top: 0, left: 0, padding: '1px', background: 'white', borderRadius: '1px', transform: 'scale(1)', transformOrigin: 'top left'}}>
+                <Box align="start" style={{ position: 'absolute', top: 0, left: 0, padding: '1px'}}>
                     <HomeButton />
                 </Box>
                     <Box align="center" justify="center" pad={{ vertical: 'medium' }}>

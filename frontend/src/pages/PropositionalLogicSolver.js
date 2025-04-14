@@ -156,7 +156,7 @@ const PropositionalLogicSolver = () => {
       <Background />
       <Box align="center" justify="center" pad="medium" background="white" style={{ position: 'relative', zIndex: 1, width: '55%', margin: 'auto', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
       <PageContent align="center" skeleton={false}>
-      <Box style={{ position: 'absolute', top: 0, left: 0, padding: '10px' }}>
+      <Box style={{ position: 'absolute', top: 0, left: 0, padding: '1px'}}>
             <HomeButton />
           </Box>
           <Box align="end" style={{ position: 'absolute', top: 0, right: 0, padding: '10px' }}>
