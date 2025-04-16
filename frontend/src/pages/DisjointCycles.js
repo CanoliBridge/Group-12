@@ -203,7 +203,7 @@ const Description = () => {
         />
         <Text weight="bold" margin={{"bottom": "small"}}>Cycle Form</Text>
         <LatexLine
-          string="The cycle form of a permutation expresses the permutation as a composition of disjoint cycles, where each element maps to the element to its right (wrapping at the end). Every permutation on finite sets, besides the identity permutation, can be represented this way (with a single element cycle (a) representing the identity, for output purposes). The solver takes a potentially non-disjoint composition of cycles to a disjoint one. Example of non-disjoint: $$ (1\ 2\ 3)\circ (3\ 4)$$."
+          string="The cycle form of a permutation expresses the permutation as a composition of disjoint cycles, where each element maps to the element to its right (wrapping at the end). Every permutation on finite sets, besides the identity permutation, can be represented this way (with a single element cycle (a) representing the identity, for output purposes). The solver takes a potentially non-disjoint composition of cycles to a disjoint one. Example of non-disjoint: $$ (1\ 2\ 3)\circ (3\ 4)$$"
         />
         <LatexLine
           string="Enter your composition of cycles below."
