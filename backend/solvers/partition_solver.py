@@ -45,7 +45,7 @@ def solve(set_string, partition_string):
                 i = set_list.index(a)
                 piece.add(i)
                 if set_counter[i] > 0:
-                    raise exceptions.CalculateError(f"Element {a} appears in multiple pieces.")
+                    raise exceptions.CalculateError(f"Element {a} appears in multiple parts.")
                 set_counter[i] = 1
             except ValueError:
                 raise exceptions.CalculateError(f"Element {a} is not in the set.")
@@ -63,7 +63,14 @@ def solve(set_string, partition_string):
                 relation_string += f"({set_list[a]}, {set_list[b]}), "
 
     if collection != set_:
-        raise exceptions.CalculateError(f"Partition is missing elements.")
+        missing = set_ - collection
+        missing_string = "{"
+        for i in missing:
+            missing_string += f"{set_list[i]}, "
+
+        missing_string = missing_string[:-2]
+        missing_string += "}"
+        raise exceptions.CalculateError(f"Partition is missing elements: {missing_string}")
 
     if collection:
         relation_string = relation_string[:-2]

@@ -16,6 +16,7 @@ const CompositionOfPermutations = () => {
   const [setTwo, setSetTwo] = React.useState('');
   const [perm, setPerm] = React.useState('');
   const [comp, setComp] = React.useState('');
+  const [denom, setDenom] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
@@ -34,6 +35,7 @@ const CompositionOfPermutations = () => {
     setLoading(true);
     setPerm('');
     setComp('');
+    setDenom('');
     setError('');
 
     // Start timing for performance tracking
@@ -64,6 +66,7 @@ const CompositionOfPermutations = () => {
       if (parsedResult && parsedResult.perm !== undefined && parsedResult.comp !== undefined) {
         setPerm(parsedResult.perm); // Assign the correct perm value
         setComp(parsedResult.comp); // Assign the correct comp value
+        setDenom(parsedResult.denom); // Assign the correct comp value
       } else {
         setError('Invalid response structure.');
       }
@@ -194,7 +197,9 @@ const CompositionOfPermutations = () => {
             background={{ color: "light-3" }}
             round="small"
           >
-            <Text>
+          <div style={{ textAlign: 'center', margin: '2rem auto' }}>
+            {/* Numerator */}
+            <Text style={{ display: 'block', textAlign: 'center' }}>
               {comp
                 ? comp.split(' ').map((word, i) => (
                     <span key={i} style={{ textDecoration: word.includes('\u0336') ? 'line-through' : 'none' }}>
@@ -203,6 +208,25 @@ const CompositionOfPermutations = () => {
                   ))
                 : "Output will be displayed here!"}
             </Text>
+
+            {/* Fraction Line */}
+            <div style={{
+              borderTop: '2px solid black',
+              width: '80%',
+              margin: '0.5rem auto'
+            }}></div>
+
+            {/* Denominator */}
+            <Text style={{ display: 'block', textAlign: 'center' }}>
+              {denom
+                ? denom.split(' ').map((word, i) => (
+                    <span key={i} style={{ textDecoration: word.includes('\u0336') ? 'line-through' : 'none' }}>
+                      {word.replace(/\u0336/g, '') + ' '}
+                    </span>
+                  ))
+                : ""}
+            </Text>
+          </div>
           </Box>
         </Box>
       </Box>

@@ -3,7 +3,7 @@ import { Box, Text, TextInput, Button } from 'grommet';
 import { Add, Trash } from 'grommet-icons';
 
 // Custom component for adding multiple partitions
-const PartitionInput = ({ value, onChange }) => {
+const PartitionInput = ({ value, wholeValue, onChange }) => {
   // Parse the initial value if it exists
    // Parse the initial value if it exists - memoize this function
    const parseInitialPartitions = useCallback(() => {
@@ -145,7 +145,28 @@ const PartitionInput = ({ value, onChange }) => {
       
       <Box margin={{ top: 'small' }} background="light-2" pad="small" round="small">
         <Text size="small">
-        Preview: {`{${partitions.map(p => p.trim()).filter(trimmed => trimmed !== '').map(trimmed => `{${trimmed}}`).join(',')}}`}
+          {
+            (() => {
+              const flattenSet = (setStr) => {
+                if (typeof setStr !== 'string') return new Set();
+
+                // Match everything between top-level braces
+                const matches = [...setStr.matchAll(/\{([^{}]*)\}/g)];
+                const elements = matches
+                  .map(match => match[1]) // inner content of each {...}
+                  .flatMap(part => part.split(',').map(e => e.trim())) // split & trim
+                  .filter(e => e !== '');
+
+                return new Set(elements);
+              };
+
+              const currentSet = flattenSet(value);
+              const fullSet = flattenSet(wholeValue);
+              const difference = [...fullSet].filter(e => !currentSet.has(e));
+
+              return `Missing elements: {${difference.join(', ')}}`;
+            })()
+          }
         </Text>
       </Box>
     </Box>

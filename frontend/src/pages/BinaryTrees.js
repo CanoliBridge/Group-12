@@ -16,7 +16,7 @@ const BinaryTrees = () => {
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
-
+  const [properties, setProperties] = React.useState(null);
   const { trackResults } = useDiagnostics("BINARY_TREES");
 
   const SAMPLE_REGULAR_TREE = "A B C D E None F";
@@ -99,7 +99,10 @@ const BinaryTrees = () => {
         <TextInput 
           placeholder={getPlaceholder()}
           value={input}
-          onChange={(event) => setInput(event.target.value)}
+          onChange={(event) => {
+            setInput(event.target.value);
+            setProperties(null);
+          }}          
         />
       </Box>
     );
@@ -159,6 +162,7 @@ const BinaryTrees = () => {
         );
 
         setOutput(result["image"]);
+        setProperties(result["properties"] || null);
       }
     } catch (err) {
       console.log(err);
@@ -190,14 +194,28 @@ const BinaryTrees = () => {
     if (!output) {
       return "Output will be displayed here!";
     }
-
-    // Parse out json object and return out elements one by one
+  
     return (
       <Box>
-        <img src={`data:image/png;base64,${output}`} alt="Graph" style={{ maxWidth: '100%', height: 'auto' }} />
+        <img
+          src={`data:image/png;base64,${output}`}
+          alt="Graph"
+          style={{ maxWidth: '100%', height: 'auto' }}
+        />
+        {properties && (
+          <Box margin={{ top: 'medium' }}>
+            <Text weight="bold" margin={{ bottom: 'small' }}>Tree Properties:</Text>
+            {Object.entries(properties).map(([key, value]) => (
+              <Text key={key}>
+                {key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}:{" "}
+                {Array.isArray(value) ? value.join(', ') : String(value)}
+              </Text>
+            ))}
+          </Box>
+        )}
       </Box>
     );
-  };
+  };  
 
   // Validate the input based on the tree type
   const validateInput = (input, treeType) => {

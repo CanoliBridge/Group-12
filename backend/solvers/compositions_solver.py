@@ -121,14 +121,15 @@ def solve(setOneSize, setTwoSize):
 
 
     compositions = " * ".join(composition_parts)
-    compositions += " / (" + "* ".join(final_denominator_parts) + ")"
+    denom = "* ".join(final_denominator_parts)
 
     if setOneSize == setTwoSize:
         compositions = "1"
 
     result = {
         "perm": permutations,
-        "comp": compositions
+        "comp": compositions,
+        "denom": denom
     }
 
     return json.dumps(result)
