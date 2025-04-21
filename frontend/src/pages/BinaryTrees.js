@@ -26,6 +26,18 @@ const BinaryTrees = () => {
     setInput(treeType === 'regular' ? SAMPLE_REGULAR_TREE : SAMPLE_MATH_EXPRESSION);
   };
 
+  const fillWithFullSample = () => {
+    setInput("A B C D E F G")
+  };
+
+  const fillWithCompleteSample = () => {
+    setInput("A B C D E F")
+  };
+
+  const fillWithUnbalancedSample = () => {
+    setInput("A B C D E None F None None G H None None None None I")
+  };
+
   const Info = () => {
     return (
       <>
@@ -68,6 +80,30 @@ const BinaryTrees = () => {
           <Button 
             label="Fill with Sample" 
             onClick={fillWithSample} 
+            primary 
+            size="small"
+            border={{ color: 'black', size: '2px' }}
+            pad={{ vertical: 'xsmall', horizontal: 'small' }}
+          />
+          <Button 
+            label="Fill with complete Sample" 
+            onClick={fillWithCompleteSample} 
+            primary 
+            size="small"
+            border={{ color: 'black', size: '2px' }}
+            pad={{ vertical: 'xsmall', horizontal: 'small' }}
+          />
+          <Button 
+            label="Fill with full Sample" 
+            onClick={fillWithFullSample} 
+            primary 
+            size="small"
+            border={{ color: 'black', size: '2px' }}
+            pad={{ vertical: 'xsmall', horizontal: 'small' }}
+          />
+          <Button 
+            label="Fill with unbalanced Sample" 
+            onClick={fillWithUnbalancedSample} 
             primary 
             size="small"
             border={{ color: 'black', size: '2px' }}

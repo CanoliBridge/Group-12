@@ -26,7 +26,7 @@ const SET_OPERATORS = [
 // Default set types
 const SET_TYPES = [
   { label: "Regular Set", value: "regular" },
-  { label: "Set Builder Notation", value: "builder" }
+  { label: "Set Builder", value: "builder" }
 ];
 
 const SetFunctionInput = ({ 
@@ -135,7 +135,7 @@ const SetFunctionInput = ({
               />
             </FormField>
             
-            <FormField label="Type" width="medium">
+            <FormField label="Type" width="small">
               <Select
                 options={SET_TYPES}
                 labelKey="label"
@@ -170,10 +170,10 @@ const SetFunctionInput = ({
       {/* Expressions Section */}
       <Box margin={{ top: "medium", bottom: "medium" }}>
         <Box direction="row" justify="between" align="center">
-          <Heading level={4} margin={{ bottom: "small" }}>Create Expressions</Heading>
+          <Heading level={4} margin={{ bottom: "small" }}>Create Statements</Heading>
           <Button 
             icon={<Add />} 
-            label="Add Expression" 
+            label="Add Statement" 
             onClick={addExpression} 
             size="small"
           />
@@ -192,18 +192,11 @@ const SetFunctionInput = ({
             wrap={false} // Prevent wrapping to ensure single line
           >
             <Box basis="25%" flex={false}>
-              <Select
-                options={[
-                  ...sets.map(s => s.name),
-                  ...(expr.operator === "∈" ? ["1", "2", "3", "{1, 2}", "∅"] : [])
-                ]}
+              <TextInput
                 value={expr.leftOperand}
-                onChange={({ option }) => updateExpression(index, 'leftOperand', option)}
-                dropProps={{ 
-                  align: { top: 'bottom' },
-                  overflow: "auto",
-                  elevation: "small"
-                }}
+                onChange={(e) => updateExpression(index, 'leftOperand', e.target.value)}
+                placeholder="Enter element or set (e.g., 1, {1,2}, ∅)"
+                size="small"
               />
             </Box>
             
@@ -227,15 +220,12 @@ const SetFunctionInput = ({
             </Box>
             
             <Box basis="25%" flex={false}>
-              <Select
-                options={sets.map(s => s.name)}
-                value={expr.rightOperand}
-                onChange={({ option }) => updateExpression(index, 'rightOperand', option)}
-                dropProps={{ 
-                  align: { top: 'bottom' },
-                  overflow: "auto"
-                }}
-              />
+            <TextInput
+              value={expr.rightOperand}
+              onChange={(e) => updateExpression(index, 'rightOperand', e.target.value)}
+              placeholder="Enter element or set (e.g., 1, {1,2}, ∅)"
+              size="small"
+            />
             </Box>
             
             <Box basis="15%" flex={false} align="center">

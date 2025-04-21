@@ -32,6 +32,21 @@ const PropositionalLogicSolver = () => {
     setConclusion(SAMPLE_CONCLUSION);
   };
 
+  const fillWithSampleTwo = () => {
+    setHypotheses("A -> B ^ B → C")
+    setConclusion("A > C")
+  };
+
+  const fillWithSampleThree = () => {
+    setHypotheses("(C > D) > C")
+    setConclusion("(C > D) > D")
+  };
+
+  const fillWithSampleFour = () => {
+    setHypotheses("A > B ^ A ^ C")
+    setConclusion("B")
+  };
+
   const Info = () => {
     return (
       <>
@@ -53,6 +68,33 @@ const PropositionalLogicSolver = () => {
           <Button 
             label="Fill with Sample" 
             onClick={fillWithSample} 
+            primary 
+            onMouseDown={(e) => e.preventDefault()}
+            size="small"
+            border={{ color: 'black', size: '2px' }}
+            pad={{ vertical: 'xsmall', horizontal: 'small' }}
+          />
+          <Button 
+            label="Fill with implies Sample" 
+            onClick={fillWithSampleTwo} 
+            primary 
+            onMouseDown={(e) => e.preventDefault()}
+            size="small"
+            border={{ color: 'black', size: '2px' }}
+            pad={{ vertical: 'xsmall', horizontal: 'small' }}
+          />
+          <Button 
+            label="Fill with special implies Sample" 
+            onClick={fillWithSampleThree} 
+            primary 
+            onMouseDown={(e) => e.preventDefault()}
+            size="small"
+            border={{ color: 'black', size: '2px' }}
+            pad={{ vertical: 'xsmall', horizontal: 'small' }}
+          />
+          <Button 
+            label="Fill with unused hypotheses Sample" 
+            onClick={fillWithSampleFour} 
             primary 
             onMouseDown={(e) => e.preventDefault()}
             size="small"

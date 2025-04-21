@@ -431,8 +431,6 @@ def cycleThrough(conclusion):
     global letters
     printedH.clear()
     HsPrinted = 0
-    outputString = ""
-    outputStrng = ""
     
     print([str(h) for h in hypothesi])
 
@@ -717,6 +715,8 @@ def cycleThrough(conclusion):
 
     if hasntThing:
         if isinstance(conclusion, IMPLIES):
+            outputString = ""
+            outputStrng = ""
 
             while isinstance(conclusion, IMPLIES):
                 outputString += "Because this conclusion only matters if " + str(conclusion.letter1) + " is true, then we can assume that it is, and place it in our hypotheses. This also means our new conclusion is " + str(conclusion.letter2) + "\n"

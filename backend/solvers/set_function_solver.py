@@ -194,20 +194,20 @@ def check_cartesian_product(A, B):
 def format_set_for_display(set_obj):
     """Format a set for display in output with better handling for cartesian products"""
     if isinstance(set_obj, frozenset):
-        # For empty set
         if len(set_obj) == 0:
             return "∅"
-            
-        # Sort elements for consistent display
-        elements = sorted(set_obj, key=lambda x: str(x))
         
-        # Check if this is likely a cartesian product (contains tuples)
+        try:
+            # Sort numerically if possible
+            elements = sorted(set_obj, key=lambda x: (float(x) if isinstance(x, (int, float, Fraction)) else str(x)))
+        except Exception:
+            # Fallback to string sorting
+            elements = sorted(set_obj, key=lambda x: str(x))
+
         is_cartesian = any(isinstance(e, tuple) and len(e) == 2 for e in elements)
-        
-        # For sets with many elements, truncate
+
         if len(elements) > 10:
             if is_cartesian:
-                # Format as ordered pairs for cartesian product
                 formatted_elements = [f"({format_element(e[0])}, {format_element(e[1])})" if isinstance(e, tuple) else str(e) for e in elements[:5]]
                 formatted_elements_end = [f"({format_element(e[0])}, {format_element(e[1])})" if isinstance(e, tuple) else str(e) for e in elements[-5:]]
                 elements_str = ", ".join(formatted_elements) + ", ..., " + ", ".join(formatted_elements_end)
@@ -215,11 +215,10 @@ def format_set_for_display(set_obj):
                 elements_str = ", ".join(str(e) for e in elements[:5]) + ", ..., " + ", ".join(str(e) for e in elements[-5:])
         else:
             if is_cartesian:
-                # Format as ordered pairs for cartesian product
                 elements_str = ", ".join(f"({format_element(e[0])}, {format_element(e[1])})" if isinstance(e, tuple) else str(e) for e in elements)
             else:
                 elements_str = ", ".join(str(e) for e in elements)
-            
+        
         return "{" + elements_str + "}"
     else:
         return str(set_obj)
